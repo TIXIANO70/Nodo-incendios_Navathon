@@ -10,22 +10,22 @@ ACTIVO = "ACTIVO"
 OFFLINE = "OFFLINE"
 ERROR = "ERROR"
 
-registro = {
+registro = { # Registro en forma de diccionario
     "ultimo_dato": None,  # datetime del último dato válido
     "ultimo_error": None,  # datetime del último error
     "detalle_error": None,  # descripción del último error
 }
 
 
-def ahora():
+def ahora(): # Devuelve la hora actual
     return datetime.datetime.now(datetime.timezone.utc)
 
 
-def formato(dt):
+def formato(dt): # Re-formatea una hora a la versión normalizada
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ") if dt else None
 
 
-def reciente(dt):
+def reciente(dt): # Determina si un evento ocurrió dentro de los últimos 30 segundos.
     return dt is not None and (ahora() - dt).total_seconds() <= TIMEOUT_SEGUNDOS
 
 
@@ -44,9 +44,9 @@ def obtener_estado():
     return OFFLINE
 
 
-def procesar(nombre):
-    datos = request.get_json(silent=True)
-    if datos is None:
+def procesar(nombre): #Función que procesa y valida la información del ESP. "nombre"= parametro que indica el nombre del dato a procesar
+    datos = request.get_json(silent=True) # Extrae el cuerpo de la petición
+    if datos is None: # Si la extracción falla por falta de datos
         registro["ultimo_error"] = ahora()
         registro["detalle_error"] = f"{nombre}: JSON inválido o vacío"
         print(formato(registro["ultimo_error"]), "ERROR:", registro["detalle_error"])
