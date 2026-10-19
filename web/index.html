@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo de Incendios Forestales - Grupo 1 | Navathon III</title>
+    <!-- Fuente Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Librería Chart.js para los gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Enlace al archivo CSS externo -->
+    <link rel="stylesheet" href="navathon.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <span class="logo-icon">🔥</span>
+            <div class="logo-text">
+                <h1>Monitoreo de Incendios Forestales (neuquen)</h1>
+                <p>Caso Copahue • Grupo 1 (Navathon III)</p>
+            </div>
+        </div>
+        
+        <!-- Navegación entre páginas independientes -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="location.href='index.html'">Inicio</button>
+            <button class="tab-btn" onclick="location.href='Historial/historial.html'">Historial</button>
+        </nav>
+
+        <div class="node-status">
+            <div class="status-dot"></div>
+            <span>Nodo: fire_node_01 (Activo)</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- SECCIÓN 1: INICIO -->
+        <section id="seccion-inicio" class="view-section active">
+            <!-- Panel de Alerta Dinámica -->
+            <div class="card alert-card" id="alertCard">
+                <div class="alert-info">
+                    <h2 id="alertTitle">Estado del Sistema: Normal (Tranqui)</h2>
+                    <p id="alertDesc">Condiciones estables en el entorno monitoreado.</p>
+                </div>
+                <div class="alert-badge" id="alertBadge">NORMAL</div>
+            </div>
+
+            <!-- Métrica y Mini-gráfico: Temperatura -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Temperatura Ambiental</span>
+                    <span>🌡️</span>
+                </div>
+                <div class="card-value" id="tempValue">30.7 °C</div>
+                <div class="mini-chart-wrapper">
+                    <canvas id="miniTempChart"></canvas>
+                </div>
+                <div class="card-footer">Sensor DHT22 (ESP32)</div>
+            </div>
+
+            <!-- Métrica y Mini-gráfico: Humedad -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Humedad Relativa</span>
+                    <span>💧</span>
+                </div>
+                <div class="card-value" id="humValue">26 %</div>
+                <div class="mini-chart-wrapper">
+                    <canvas id="miniHumChart"></canvas>
+                </div>
+                <div class="card-footer">Umbral crítico bajo: &lt; 30%</div>
+            </div>
+
+            <!-- Métrica y Mini-gráfico: Viento -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Velocidad del Viento</span>
+                    <span>💨</span>
+                </div>
+                <div class="card-value" id="windValue">24 km/h</div>
+                <div class="mini-chart-wrapper">
+                    <canvas id="miniWindChart"></canvas>
+                </div>
+                <div class="card-footer">Factor de propagación</div>
+            </div>
+
+            <!-- Gráfico Combinado en Vivo -->
+            <div class="combined-section">
+                <h3>Gráfico Combinado en Vivo (Temperatura, Humedad y Viento)</h3>
+                <p>Monitoreo unificado en tiempo real para determinar si el estado es seguro o grave.</p>
+                <div class="canvas-wrapper-large">
+                    <canvas id="liveCombinedChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Enlace al archivo JavaScript externo -->
+    <script src="navathon.js"></script>
+</body>
+</html>

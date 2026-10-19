@@ -1,0 +1,210 @@
+:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-fire: #f97316;
+    --alert-normal: #22c55e;
+    --alert-medium: #eab308;
+    --alert-critical: #ef4444;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), 
+                      radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-icon {
+    font-size: 2rem;
+}
+
+.logo-text h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.logo-text p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.nav-tabs {
+    display: flex;
+    gap: 10px;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 5px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.tab-btn.active, .tab-btn:hover {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.node-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card-bg);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--alert-normal);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--alert-normal);
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.view-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-title {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.card-footer {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 10px;
+}
+
+.mini-chart-wrapper {
+    position: relative;
+    height: 90px;
+    width: 100%;
+}
+
+.alert-card {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+    border-left: 6px solid var(--alert-normal);
+    padding: 25px;
+    gap: 20px;
+}
+
+.alert-info h2 {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+.alert-info p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.alert-badge {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--alert-normal);
+    border: 1px solid var(--alert-normal);
+    white-space: nowrap;
+}
+
+.combined-section {
+    grid-column: 1 / -1;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 25px;
+}
+
+.combined-section h3 {
+    margin-bottom: 5px;
+}
+
+.combined-section p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+}
+
+.canvas-wrapper-large {
+    position: relative;
+    height: 320px;
+    width: 100%;
+}
