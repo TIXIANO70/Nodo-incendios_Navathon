@@ -21,7 +21,7 @@
                 <p>Caso Copahue • Grupo 1 (Navathon III)</p>
             </div>
         </div>
-        
+
         <!-- Navegación entre páginas independientes -->
         <nav class="nav-tabs">
             <button class="tab-btn active" onclick="location.href='index.html'">Inicio</button>
@@ -30,7 +30,7 @@
 
         <div class="node-status">
             <div class="status-dot"></div>
-            <span>Nodo: fire_node_01 (Activo)</span>
+            <span id="nodeStatusText">Nodo: fire_node_01 (Conectando…)</span>
         </div>
     </header>
 
@@ -40,10 +40,10 @@
             <!-- Panel de Alerta Dinámica -->
             <div class="card alert-card" id="alertCard">
                 <div class="alert-info">
-                    <h2 id="alertTitle">Estado del Sistema: Normal (Tranqui)</h2>
-                    <p id="alertDesc">Condiciones estables en el entorno monitoreado.</p>
+                    <h2 id="alertTitle">Conectando con la API…</h2>
+                    <p id="alertDesc">Esperando la primera lectura desde el servidor Python.</p>
                 </div>
-                <div class="alert-badge" id="alertBadge">NORMAL</div>
+                <div class="alert-badge" id="alertBadge">…</div>
             </div>
 
             <!-- Métrica y Mini-gráfico: Temperatura -->
@@ -52,7 +52,7 @@
                     <span>Temperatura Ambiental</span>
                     <span>🌡️</span>
                 </div>
-                <div class="card-value" id="tempValue">30.7 °C</div>
+                <div class="card-value" id="tempValue">-- °C</div>
                 <div class="mini-chart-wrapper">
                     <canvas id="miniTempChart"></canvas>
                 </div>
@@ -65,7 +65,7 @@
                     <span>Humedad Relativa</span>
                     <span>💧</span>
                 </div>
-                <div class="card-value" id="humValue">26 %</div>
+                <div class="card-value" id="humValue">-- %</div>
                 <div class="mini-chart-wrapper">
                     <canvas id="miniHumChart"></canvas>
                 </div>
@@ -78,17 +78,30 @@
                     <span>Velocidad del Viento</span>
                     <span>💨</span>
                 </div>
-                <div class="card-value" id="windValue">24 km/h</div>
+                <div class="card-value" id="windValue">-- km/h</div>
                 <div class="mini-chart-wrapper">
                     <canvas id="miniWindChart"></canvas>
                 </div>
                 <div class="card-footer">Factor de propagación</div>
             </div>
 
+            <!-- Métrica y Mini-gráfico: Humo (nuevo, proviene de la API) -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Nivel de Humo</span>
+                    <span>🌫️</span>
+                </div>
+                <div class="card-value" id="smokeValue">-- ppm</div>
+                <div class="mini-chart-wrapper">
+                    <canvas id="miniSmokeChart"></canvas>
+                </div>
+                <div class="card-footer">Sensor MQ-2 / MQ-135</div>
+            </div>
+
             <!-- Gráfico Combinado en Vivo -->
             <div class="combined-section">
-                <h3>Gráfico Combinado en Vivo (Temperatura, Humedad y Viento)</h3>
-                <p>Monitoreo unificado en tiempo real para determinar si el estado es seguro o grave.</p>
+                <h3>Gráfico Combinado en Vivo (Temperatura, Humedad, Viento y Humo)</h3>
+                <p>Monitoreo unificado en tiempo real provisto por la API Python (<code>GET /api/incendios</code>).</p>
                 <div class="canvas-wrapper-large">
                     <canvas id="liveCombinedChart"></canvas>
                 </div>
@@ -96,7 +109,7 @@
         </section>
     </main>
 
-    <!-- Enlace al archivo JavaScript externo -->
+    <!-- Enlace al archivo JavaScript externo (versión conectada a la API) -->
     <script src="navathon.js"></script>
 </body>
 </html>

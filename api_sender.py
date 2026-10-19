@@ -65,6 +65,33 @@ DB_PATH = os.environ.get("DB_PATH", "DBincendios.db")
 app = Flask(__name__)
 
 # ==============================================================================
+# CORS  --  Permite que el frontend estático (index.html) consulte esta API
+# ==============================================================================
+# El navegador bloquea por defecto los pedidos cross-origin. Como el frontend
+# se abre desde file:// o desde otro puerto/host, agregamos estas cabeceras
+# en TODAS las respuestas. No requiere la librería flask-cors.
+ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*")  # ej: "http://localhost:8000,http://192.168.4.1"
+
+@app.after_request
+def _add_cors_headers(response):
+    origin = request.headers.get("Origin")
+    if ALLOWED_ORIGINS.strip() == "*":
+        response.headers["Access-Control-Allow-Origin"] = "*"
+    elif origin and origin in ALLOWED_ORIGINS.split(","):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Accept, User-Agent"
+    response.headers["Access-Control-Max-Age"] = "600"
+    return response
+
+@app.before_request
+def _handle_preflight():
+    """Responde 204 automáticamente a las peticiones OPTIONS preflight."""
+    if request.method == "OPTIONS":
+        return "", 204
+
+# ==============================================================================
 # ESTADO Y MÉTRICAS DE TELEMETRÍA (THREAD-SAFE)
 # ==============================================================================
 metrics_lock = threading.Lock()
@@ -460,25 +487,25 @@ if __name__ == "__main__":
     ips = obtener_ips_locales()
 
     print("\n======================================================================")
-    print("🔥 APASO - API DE MONITOREO DE INCENDIOS FORESTALES")
+    print("APASO - API DE MONITOREO DE INCENDIOS FORESTALES")
     print("======================================================================")
-    print(f"📁 Base de datos   : {DB_PATH}")
-    print(f"⚙️  Worker periódico: {'ACTIVO (' + TARGET_WEBHOOK_URL + ' cada ' + str(INTERVAL_SECONDS) + 's)' if (ENABLE_WORKER and TARGET_WEBHOOK_URL) else 'DESACTIVADO (solo modo servidor GET)'}")
+    print(f"Base de datos   : {DB_PATH}")
+    print(f" Worker periódico: {'ACTIVO (' + TARGET_WEBHOOK_URL + ' cada ' + str(INTERVAL_SECONDS) + 's)' if (ENABLE_WORKER and TARGET_WEBHOOK_URL) else 'DESACTIVADO (solo modo servidor GET)'}")
     print("----------------------------------------------------------------------")
     
     if ips:
         print("📡 ENDPOINT ACCESIBLE PARA EL NODO EN 192.168.4.1 (Y DISPOSITIVOS EXTERNOS):")
         for ip in ips:
-            print(f"   👉 http://{ip}:{PORT}/api/incendios")
+            print(f" http://{ip}:{PORT}/api/incendios")
     else:
         print("📡 ENDPOINT ACCESIBLE PARA EL NODO EN 192.168.4.1:")
         print(f"   👉 http://<TU_IP_LOCAL>:{PORT}/api/incendios")
 
     print("\n💻 ENDPOINTS LOCALES PARA PRUEBAS (En esta máquina):")
-    print(f"   👉 http://localhost:{PORT}/api/incendios")
-    print(f"   👉 http://127.0.0.1:{PORT}/api/incendios")
-    print(f"   👉 http://127.0.0.1:{PORT}/status")
-    print(f"   👉 http://127.0.0.1:{PORT}/health")
+    print(f" http://localhost:{PORT}/api/incendios")
+    print(f"http://10.160.8.56:{PORT}/api/incendios")
+    print(f"http://10.160.8.56:{PORT}/status")
+    print(f"http://10.160.8.56:{PORT}/health")
     print("======================================================================\n")
 
     iniciar_worker_daemon()
