@@ -18,7 +18,7 @@
 //   const API_BASE_URL = 'http://192.168.1.50:8081';
 const API_BASE_URL = 'http://localhost:8081';
 const API_ENDPOINT = '/api/incendios';
-const POLL_INTERVAL_MS = 5000;        // Consulta cada 5 segundos
+const POLL_INTERVAL_MS = |500;        // Consulta cada 5 segundos
 const MAX_HISTORY_POINTS = 20;        // Puntos máximos en el gráfico combinado
 
 // ==============================================================================
@@ -50,12 +50,17 @@ const historial = {
 //   "normal" (cuando está vacío) / "alert1" / "alert2" / "alert3" / "alert4" / "alert"
 // ==============================================================================
 const ALERT_CONFIG = {
-    'normal':  { label: 'NORMAL',   color: '#22c55e', title: 'Estado del Sistema: Normal',     desc: 'Parámetros dentro de rangos seguros. Sin riesgo inmediato.' },
-    'alert1':  { label: 'BAJO',     color: '#22c55e', title: 'Estado del Sistema: Bajo',        desc: 'Condiciones estables. Monitoreo continuo.' },
-    'alert2':  { label: 'MODERADO', color: '#eab308', title: 'Estado del Sistema: Moderado',   desc: 'Atención: parámetros mostrando valores elevados.' },
-    'alert3':  { label: 'ALTO',     color: '#f97316', title: 'Estado del Sistema: Alto',       desc: 'Riesgo significativo. Monitoreo continuo recomendado.' },
-    'alert4':  { label: 'CRÍTICO',  color: '#ef4444', title: 'Estado del Sistema: Crítico',     desc: 'Condiciones críticas. Acción preventiva necesaria.' },
-    'alert':   { label: 'EXTREMO',  color: '#ef4444', title: 'Estado del Sistema: Extremo',     desc: '¡Peligro inminente! Condiciones críticas combinadas de temperatura, humedad, viento y humo.' },
+    'normal':   { label: 'NORMAL',   color: '#22c55e', title: 'Estado del Sistema: Normal',     desc: 'Parámetros dentro de rangos seguros. Sin riesgo inmediato.' },
+    'low':      { label: 'BAJO',     color: '#22c55e', title: 'Estado del Sistema: Bajo',        desc: 'Condiciones estables. Monitoreo continuo.' },
+    'alert1':   { label: 'BAJO',     color: '#22c55e', title: 'Estado del Sistema: Bajo',        desc: 'Condiciones estables. Monitoreo continuo.' },
+    'medium':   { label: 'MODERADO', color: '#eab308', title: 'Estado del Sistema: Moderado',   desc: 'Atención: parámetros mostrando valores elevados.' },
+    'alert2':   { label: 'MODERADO', color: '#eab308', title: 'Estado del Sistema: Moderado',   desc: 'Atención: parámetros mostrando valores elevados.' },
+    'high':     { label: 'ALTO',     color: '#f97316', title: 'Estado del Sistema: Alto',       desc: 'Riesgo significativo. Monitoreo continuo recomendado.' },
+    'alert3':   { label: 'ALTO',     color: '#f97316', title: 'Estado del Sistema: Alto',       desc: 'Riesgo significativo. Monitoreo continuo recomendado.' },
+    'critical': { label: 'CRÍTICO',  color: '#ef4444', title: 'Estado del Sistema: Crítico',     desc: 'Condiciones críticas. Acción preventiva necesaria.' },
+    'alert4':   { label: 'CRÍTICO',  color: '#ef4444', title: 'Estado del Sistema: Crítico',     desc: 'Condiciones críticas. Acción preventiva necesaria.' },
+    'alert':    { label: 'EXTREMO',  color: '#ef4444', title: 'Estado del Sistema: Extremo',     desc: '¡Peligro inminente! Condiciones críticas combinadas de temperatura, humedad, viento y humo.' },
+    'extreme':  { label: 'EXTREMO',  color: '#ef4444', title: 'Estado del Sistema: Extremo',     desc: '¡Peligro inminente! Condiciones críticas combinadas de temperatura, humedad, viento y humo.' },
 };
 
 function obtenerAlertaConfig(alertLevel) {
@@ -100,10 +105,10 @@ async function fetchMedicion() {
 // ACTUALIZACIÓN DE TARJETAS DE MÉTRICAS
 // ==============================================================================
 function actualizarTarjetas(data) {
-    const temp  = data?.data?.temperature ?? null;
-    const hum   = data?.data?.humidity    ?? null;
-    const wind  = data?.data?.wind_speed  ?? null;
-    const smoke = data?.data?.smoke_level ?? null;
+    const temp  = data?.data?.temperature ?? data?.temperature ?? null;
+    const hum   = data?.data?.humidity    ?? data?.humidity    ?? null;
+    const wind  = data?.data?.wind_speed  ?? data?.wind_speed  ?? null;
+    const smoke = data?.data?.smoke_level ?? data?.smoke_level ?? null;
 
     if (temp !== null) {
         document.getElementById('tempValue').innerText = `${Number(temp).toFixed(1)} °C`;
@@ -168,36 +173,79 @@ function actualizarEstadoConexion() {
 }
 
 // ==============================================================================
-// GESTIÓN DEL HISTORIAL ROLLING (buffer circular)
+// PERSISTENCIA DEL HISTORIAL (localStorage)
+// ==============================================================================
+const STORAGE_KEY_HISTORIAL = 'apaso_navathon_historial_v1';
+
+function cargarHistorialPersistido() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY_HISTORIAL);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed?.labels) && parsed.labels.length > 0) {
+            historial.labels = parsed.labels.slice(-MAX_HISTORY_POINTS);
+            historial.temperatures = (parsed.temperatures || []).slice(-MAX_HISTORY_POINTS);
+            historial.humidities = (parsed.humidities || []).slice(-MAX_HISTORY_POINTS);
+            historial.windSpeeds = (parsed.windSpeeds || []).slice(-MAX_HISTORY_POINTS);
+            historial.smokeLevels = (parsed.smokeLevels || []).slice(-MAX_HISTORY_POINTS);
+
+            // Alinear longitudes si vinieron desparejas
+            const len = historial.labels.length;
+            while (historial.temperatures.length < len) historial.temperatures.push(null);
+            while (historial.humidities.length < len) historial.humidities.push(null);
+            while (historial.windSpeeds.length < len) historial.windSpeeds.push(null);
+            while (historial.smokeLevels.length < len) historial.smokeLevels.push(null);
+        }
+    } catch (err) {
+        console.warn('[Storage] Error al cargar historial persistido:', err);
+    }
+}
+
+function guardarHistorialPersistido() {
+    try {
+        localStorage.setItem(STORAGE_KEY_HISTORIAL, JSON.stringify(historial));
+    } catch (err) {
+        console.warn('[Storage] Error al persistir historial:', err);
+    }
+}
+
+// ==============================================================================
+// GESTIÓN DEL HISTORIAL ROLLING (buffer circular acumulativo en tiempo real)
 // ==============================================================================
 function agregarAlHistorial(data) {
-    const recordId = data?.record_id;
-    // Si la API no trajo un record nuevo, no agregamos punto (evita duplicados)
-    if (recordId && recordId === ultimoRecordId) return false;
-    ultimoRecordId = recordId;
+    if (!data) return false;
 
-    let tsLabel;
-    if (data?.timestamp) {
-        const dt = new Date(data.timestamp);
-        if (!isNaN(dt.getTime())) {
-            tsLabel = dt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }
+    // Extraer métricas admitiendo tanto el formato normalizado (data.data) como plano (data)
+    const temp  = data?.data?.temperature ?? data?.temperature ?? null;
+    const hum   = data?.data?.humidity    ?? data?.humidity    ?? null;
+    const wind  = data?.data?.wind_speed  ?? data?.wind_speed  ?? null;
+    const smoke = data?.data?.smoke_level ?? data?.smoke_level ?? null;
+
+    // Si no vino ninguna métrica numérica, descartar
+    if (temp === null && hum === null && wind === null && smoke === null) {
+        return false;
     }
-    if (!tsLabel) tsLabel = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    // Registrar hora de la muestra para reflejar la evolución continua en el chart
+    const ahora = new Date();
+    const tsLabel = ahora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     historial.labels.push(tsLabel);
-    historial.temperatures.push(data?.data?.temperature ?? null);
-    historial.humidities.push(data?.data?.humidity ?? null);
-    historial.windSpeeds.push(data?.data?.wind_speed ?? null);
-    historial.smokeLevels.push(data?.data?.smoke_level ?? null);
+    historial.temperatures.push(temp !== null ? Number(temp) : null);
+    historial.humidities.push(hum !== null ? Number(hum) : null);
+    historial.windSpeeds.push(wind !== null ? Number(wind) : null);
+    historial.smokeLevels.push(smoke !== null ? Number(smoke) : null);
 
-    if (historial.labels.length > MAX_HISTORY_POINTS) {
+    // Mantener ventana móvil acotada a MAX_HISTORY_POINTS
+    while (historial.labels.length > MAX_HISTORY_POINTS) {
         historial.labels.shift();
         historial.temperatures.shift();
         historial.humidities.shift();
         historial.windSpeeds.shift();
         historial.smokeLevels.shift();
     }
+
+    guardarHistorialPersistido();
     return true;
 }
 
@@ -210,7 +258,7 @@ function opcionesMini(color) {
         maintainAspectRatio: false,
         scales: { x: { display: false }, y: { display: false } },
         plugins: { legend: { display: false } },
-        elements: { point: { radius: 0 } },
+        elements: { point: { radius: 2 } },
     };
 }
 
@@ -237,27 +285,60 @@ function opcionesGenerales() {
 }
 
 // ==============================================================================
-// INICIALIZACIÓN DE GRÁFICOS (una sola vez)
+// INICIALIZACIÓN DE GRÁFICOS
 // ==============================================================================
 function inicializarGraficosVacios() {
     if (miniTemp) miniTemp.destroy();
     miniTemp = new Chart(document.getElementById('miniTempChart').getContext('2d'), {
         type: 'line',
-        data: { labels: [...historial.labels], datasets: [{ data: [...historial.temperatures], borderColor: '#f97316', borderWidth: 2, tension: 0.3, pointRadius: 0, fill: false }] },
+        data: {
+            labels: [...historial.labels],
+            datasets: [{
+                data: [...historial.temperatures],
+                borderColor: '#f97316',
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 2,
+                fill: false,
+                spanGaps: true
+            }]
+        },
         options: opcionesMini('#f97316'),
     });
 
     if (miniHum) miniHum.destroy();
     miniHum = new Chart(document.getElementById('miniHumChart').getContext('2d'), {
         type: 'line',
-        data: { labels: [...historial.labels], datasets: [{ data: [...historial.humidities], borderColor: '#3b82f6', borderWidth: 2, tension: 0.3, pointRadius: 0, fill: false }] },
+        data: {
+            labels: [...historial.labels],
+            datasets: [{
+                data: [...historial.humidities],
+                borderColor: '#3b82f6',
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 2,
+                fill: false,
+                spanGaps: true
+            }]
+        },
         options: opcionesMini('#3b82f6'),
     });
 
     if (miniWind) miniWind.destroy();
     miniWind = new Chart(document.getElementById('miniWindChart').getContext('2d'), {
         type: 'line',
-        data: { labels: [...historial.labels], datasets: [{ data: [...historial.windSpeeds], borderColor: '#a855f7', borderWidth: 2, tension: 0.3, pointRadius: 0, fill: false }] },
+        data: {
+            labels: [...historial.labels],
+            datasets: [{
+                data: [...historial.windSpeeds],
+                borderColor: '#a855f7',
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 2,
+                fill: false,
+                spanGaps: true
+            }]
+        },
         options: opcionesMini('#a855f7'),
     });
 
@@ -266,7 +347,18 @@ function inicializarGraficosVacios() {
     if (smokeCanvas) {
         miniSmoke = new Chart(smokeCanvas.getContext('2d'), {
             type: 'line',
-            data: { labels: [...historial.labels], datasets: [{ data: [...historial.smokeLevels], borderColor: '#9ca3af', borderWidth: 2, tension: 0.3, pointRadius: 0, fill: false }] },
+            data: {
+                labels: [...historial.labels],
+                datasets: [{
+                    data: [...historial.smokeLevels],
+                    borderColor: '#9ca3af',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointRadius: 2,
+                    fill: false,
+                    spanGaps: true
+                }]
+            },
             options: opcionesMini('#9ca3af'),
         });
     }
@@ -277,10 +369,10 @@ function inicializarGraficosVacios() {
         data: {
             labels: [...historial.labels],
             datasets: [
-                { label: 'Temperatura (°C)', data: [...historial.temperatures], borderColor: '#f97316', borderWidth: 2, tension: 0.3, pointRadius: 2, fill: false },
-                { label: 'Humedad (%)',     data: [...historial.humidities],   borderColor: '#3b82f6', borderWidth: 2, tension: 0.3, pointRadius: 2, fill: false },
-                { label: 'Viento (km/h)',   data: [...historial.windSpeeds],   borderColor: '#a855f7', borderWidth: 2, tension: 0.3, pointRadius: 2, fill: false },
-                { label: 'Humo (ppm)',       data: [...historial.smokeLevels],  borderColor: '#9ca3af', borderWidth: 2, tension: 0.3, pointRadius: 2, fill: false, hidden: false },
+                { label: 'Temperatura (°C)', data: [...historial.temperatures], borderColor: '#f97316', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false, spanGaps: true },
+                { label: 'Humedad (%)',     data: [...historial.humidities],   borderColor: '#3b82f6', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false, spanGaps: true },
+                { label: 'Viento (km/h)',   data: [...historial.windSpeeds],   borderColor: '#a855f7', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false, spanGaps: true },
+                { label: 'Humo (ppm)',       data: [...historial.smokeLevels],  borderColor: '#9ca3af', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false, hidden: false, spanGaps: true },
             ],
         },
         options: opcionesGenerales(),
@@ -363,13 +455,16 @@ async function cicloPolling() {
 // ARRANQUE
 // ==============================================================================
 async function iniciar() {
-    // 1) Crear gráficos vacíos (con historial vacío)
+    // 1) Cargar historial persistido previo si existe en localStorage
+    cargarHistorialPersistido();
+
+    // 2) Inicializar gráficos (con datos persistidos o vacíos)
     inicializarGraficosVacios();
 
-    // 2) Hacer la primera petición inmediatamente
+    // 3) Hacer la primera petición inmediatamente
     await cicloPolling();
 
-    // 3) Programar el polling
+    // 4) Programar el polling recurrente
     setInterval(cicloPolling, POLL_INTERVAL_MS);
 }
 

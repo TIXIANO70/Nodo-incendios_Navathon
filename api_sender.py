@@ -29,6 +29,7 @@ if os.path.exists(_venv_python) and sys.executable != _venv_python:
 
 from flask import Flask, jsonify, request
 
+
 # ==============================================================================
 # CARGA DE VARIABLES DE ENTORNO (.env)
 # ==============================================================================
@@ -56,8 +57,10 @@ cargar_env()
 # CONFIGURACIÓN GENERAL
 # ==============================================================================
 TARGET_WEBHOOK_URL = os.environ.get("TARGET_WEBHOOK_URL", "")
-ENABLE_WORKER = os.environ.get("ENABLE_WORKER", "true" if TARGET_WEBHOOK_URL else "false").lower() in ("true", "1", "yes")
-INTERVAL_SECONDS = int(os.environ.get("INTERVAL_SECONDS", "30"))
+ENABLE_WORKER = os.environ.get(
+    "ENABLE_WORKER", "true" if TARGET_WEBHOOK_URL else "false"
+).lower() in ("true", "1", "yes")
+INTERVAL_SECONDS = int(os.environ.get("INTERVAL_SECONDS", "2"))
 PORT = int(os.environ.get("PORT", "8081"))
 HOST = os.environ.get("HOST", "0.0.0.0")
 DB_PATH = os.environ.get("DB_PATH", "DBincendios.db")
@@ -70,7 +73,10 @@ app = Flask(__name__)
 # El navegador bloquea por defecto los pedidos cross-origin. Como el frontend
 # se abre desde file:// o desde otro puerto/host, agregamos estas cabeceras
 # en TODAS las respuestas. No requiere la librería flask-cors.
-ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*")  # ej: "http://localhost:8000,http://192.168.4.1"
+ALLOWED_ORIGINS = os.environ.get(
+    "ALLOWED_ORIGINS", "*"
+)  # ej: "http://localhost:8000,http://192.168.4.1"
+
 
 @app.after_request
 def _add_cors_headers(response):
@@ -81,15 +87,19 @@ def _add_cors_headers(response):
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Vary"] = "Origin"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Accept, User-Agent"
+    response.headers["Access-Control-Allow-Headers"] = (
+        "Content-Type, Accept, User-Agent"
+    )
     response.headers["Access-Control-Max-Age"] = "600"
     return response
+
 
 @app.before_request
 def _handle_preflight():
     """Responde 204 automáticamente a las peticiones OPTIONS preflight."""
     if request.method == "OPTIONS":
         return "", 204
+
 
 # ==============================================================================
 # ESTADO Y MÉTRICAS DE TELEMETRÍA (THREAD-SAFE)
@@ -179,8 +189,8 @@ def normalizar_medicion(fila_dict):
         "wind_speed": 5.2
       },
       "metadata": {
-        "environment": "test",
-        "source_type": "simulated",
+        "environment": "operational",
+        "source_type": "real",
         "alert_evaluated": true,
         "clock_synced": true,
         "units": { ... },
@@ -366,7 +376,10 @@ def ejecutar_ciclo_envio():
             metrics["last_attempt_at"] = timestamp_inicio
             metrics["last_error"] = "Sin mediciones en la tabla"
         print(f"[{timestamp_inicio}] [WORKER] La tabla mediciones se encuentra vacía.")
-        return {"status": "empty", "message": "No hay mediciones registradas en la base de datos"}
+        return {
+            "status": "empty",
+            "message": "No hay mediciones registradas en la base de datos",
+        }
 
     if not TARGET_WEBHOOK_URL:
         return {"status": "skipped", "message": "TARGET_WEBHOOK_URL no configurada"}
@@ -381,11 +394,15 @@ def ejecutar_ciclo_envio():
             metrics["last_success_at"] = timestamp_inicio
             metrics["last_error"] = None
             metrics["total_dispatched"] += 1
-            print(f"[{timestamp_inicio}] [ENVÍO EXITOSO] Record {registro.get('record_id')} -> HTTP {http_code}")
+            print(
+                f"[{timestamp_inicio}] [ENVÍO EXITOSO] Record {registro.get('record_id')} -> HTTP {http_code}"
+            )
         else:
             metrics["last_error"] = err_http
             metrics["total_errors"] += 1
-            print(f"[{timestamp_inicio}] [FALLO ENVÍO] HTTP {http_code} | Detalle: {err_http}")
+            print(
+                f"[{timestamp_inicio}] [FALLO ENVÍO] HTTP {http_code} | Detalle: {err_http}"
+            )
 
     return {
         "status": "success" if exito else "failed",
@@ -404,7 +421,9 @@ def worker_loop():
     with metrics_lock:
         metrics["worker_active"] = True
 
-    print(f"[{ahora_utc()}] [WORKER] Iniciado. Enviando a {TARGET_WEBHOOK_URL} cada {INTERVAL_SECONDS}s.")
+    print(
+        f"[{ahora_utc()}] [WORKER] Iniciado. Enviando a {TARGET_WEBHOOK_URL} cada {INTERVAL_SECONDS}s."
+    )
 
     while not stop_event.is_set():
         try:
@@ -433,7 +452,9 @@ def api_incendios():
     if err_db:
         return jsonify({"error": err_db}), 500
     if not registro:
-        return jsonify({"error": "No hay mediciones registradas en la base de datos"}), 404
+        return jsonify(
+            {"error": "No hay mediciones registradas en la base de datos"}
+        ), 404
     return jsonify(registro), 200
 
 
@@ -448,10 +469,16 @@ def health():
     """Verifica salud y conectividad a SQLite."""
     _, err_db = obtener_ultima_medicion()
     if err_db and "no encontrada" in err_db.lower():
-        return jsonify({"status": "degraded", "database": "not_found", "detail": err_db}), 503
+        return jsonify(
+            {"status": "degraded", "database": "not_found", "detail": err_db}
+        ), 503
     if err_db:
-        return jsonify({"status": "degraded", "database": "error", "detail": err_db}), 500
-    return jsonify({"status": "healthy", "database": "connected", "timestamp": ahora_utc()}), 200
+        return jsonify(
+            {"status": "degraded", "database": "error", "detail": err_db}
+        ), 500
+    return jsonify(
+        {"status": "healthy", "database": "connected", "timestamp": ahora_utc()}
+    ), 200
 
 
 @app.route("/status", methods=["GET"])
@@ -477,7 +504,9 @@ def send_now():
 def iniciar_worker_daemon():
     """Inicia el worker si está habilitado."""
     if ENABLE_WORKER and TARGET_WEBHOOK_URL:
-        hilo = threading.Thread(target=worker_loop, daemon=True, name="WorkerSenderThread")
+        hilo = threading.Thread(
+            target=worker_loop, daemon=True, name="WorkerSenderThread"
+        )
         hilo.start()
         return hilo
     return None
@@ -490,11 +519,15 @@ if __name__ == "__main__":
     print("APASO - API DE MONITOREO DE INCENDIOS FORESTALES")
     print("======================================================================")
     print(f"Base de datos   : {DB_PATH}")
-    print(f" Worker periódico: {'ACTIVO (' + TARGET_WEBHOOK_URL + ' cada ' + str(INTERVAL_SECONDS) + 's)' if (ENABLE_WORKER and TARGET_WEBHOOK_URL) else 'DESACTIVADO (solo modo servidor GET)'}")
+    print(
+        f" Worker periódico: {'ACTIVO (' + TARGET_WEBHOOK_URL + ' cada ' + str(INTERVAL_SECONDS) + 's)' if (ENABLE_WORKER and TARGET_WEBHOOK_URL) else 'DESACTIVADO (solo modo servidor GET)'}"
+    )
     print("----------------------------------------------------------------------")
-    
+
     if ips:
-        print("📡 ENDPOINT ACCESIBLE PARA EL NODO EN 192.168.4.1 (Y DISPOSITIVOS EXTERNOS):")
+        print(
+            "📡 ENDPOINT ACCESIBLE PARA EL NODO EN 192.168.4.1 (Y DISPOSITIVOS EXTERNOS):"
+        )
         for ip in ips:
             print(f" http://{ip}:{PORT}/api/incendios")
     else:

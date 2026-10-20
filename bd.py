@@ -1,24 +1,26 @@
 import sqlite3
 import datetime
 import uuid
-from flask import Flask, request, jsonify 
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-#Humedad de la flora seca = floraHum (Puede que no la usemos o hagamos un claculo de sequia unicamente)
-def calcularPeligro ():
-    humRe = max(1.0, min(100.0, humidity)) # Humedad relativa
+
+# Humedad de la flora seca = floraHum (Puede que no la usemos o hagamos un claculo de sequia unicamente)
+def calcularPeligro():
+    humRe = max(1.0, min(100.0, humidity))  # Humedad relativa
     if humRe < 15.0:
         floraHum = 0.25 * humRe - 0.05 * temperature + 1.5
     elif humRe < 50.0:
-        floraHum = 0.18 * humRe - 0.04 * temperature + 3.0 
+        floraHum = 0.18 * humRe - 0.04 * temperature + 3.0
     else:
         floraHum = 0.22 * humRe - 0.02 * temperature + 5.0
     return floraHum
 
-# tempF = (temperature * 1.8) + 32.0  # Conversión a Fahrenheit requerida por la fórmula    
-def estado (): #Funcion que devuelve el estado de alerta segun las condiciones  
-    smoke = 0 
+
+# tempF = (temperature * 1.8) + 32.0  # Conversión a Fahrenheit requerida por la fórmula
+def estado():  # Funcion que devuelve el estado de alerta segun las condiciones
+    smoke = 0
     # hcfm = calcularPeligro(temperature, humidity)  # Variable que representa el nivel de humedad y peligro
     """
     if (temp >= 35.0 and humidity <= 15.0) or smoke <= 10.0:                           
@@ -45,17 +47,16 @@ def estado (): #Funcion que devuelve el estado de alerta segun las condiciones
         nivel = 2  # Moderado
     else:
         nivel = 1  # Bajo
-    return nivel  
-
-
-
+    return nivel
 
 
 def reloj():
     return datetime.datetime.now(datetime.timezone.utc)
 
+
 def formato(dt):
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ") if dt else None
+
 
 def extraer_float(request_obj):
     datos = request_obj.get_json(silent=True)
@@ -66,7 +67,14 @@ def extraer_float(request_obj):
     # Si es un diccionario, buscamos el valor adentro
     if isinstance(datos, dict):
         # Toma el primer valor numérico que encuentre o claves típicas
-        for clave in ("value", "valor", "temperature", "humidity", "wind_speed", "smoke_level"):
+        for clave in (
+            "value",
+            "valor",
+            "temperature",
+            "humidity",
+            "wind_speed",
+            "smoke_level",
+        ):
             if clave in datos:
                 datos = datos[clave]
                 break
@@ -89,34 +97,36 @@ mediciones_actuales = {
     "smoke_level": None,
 }
 
-def insercion ():
-    #temperature = # Temperatura 
-    #humidity =  # humedad
-    #wind_level = # Viento por metros sobre segundo 
-    #smoke = # humo
-    record_id = str(uuid.uuid4()) 
-    nivel = estado()
-    
-    ALERTS = ["", "alert1", "alert2", "alert3", "alert4", "alert"]
-    alert = ALERTS[nivel]
-    #dt = datetime.datetime.now(datetime.timezone.utc) # Objeto que permite usar datetime 
-    now = formato(reloj()) # Variable de hora actual
-    datos = (
-                record_id,
-                "fire_node_01",
-                now,
-                alert,
-                mediciones_actuales["temperature"],
-                mediciones_actuales["humidity"],
-                mediciones_actuales["wind_speed"],
-                mediciones_actuales["smoke_level"]
-     ) #Lista que sera ingresada como datos 
-    query = "INSERT INTO mediciones (record_id, node_id, timestamp, alert_level, temperature, humidity, wind_speed, smoke_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)" #Formato del insert 
 
-    with sqlite3.connect("DBincendios.db") as con: 
-        cur = con.cursor() # Cursor hacia la bd 
-        cur.execute (query, datos)
+def insercion():
+    # temperature = # Temperatura
+    # humidity =  # humedad
+    # wind_level = # Viento por metros sobre segundo
+    # smoke = # humo
+    record_id = str(uuid.uuid4())
+    nivel = estado()
+
+    ALERTS = ["", "normal", "low", "medium", "high", "critical"]
+    alert = ALERTS[nivel]
+    # dt = datetime.datetime.now(datetime.timezone.utc) # Objeto que permite usar datetime
+    now = formato(reloj())  # Variable de hora actual
+    datos = (
+        record_id,
+        "fire_node_01",
+        now,
+        alert,
+        mediciones_actuales["temperature"],
+        mediciones_actuales["humidity"],
+        mediciones_actuales["wind_speed"],
+        mediciones_actuales["smoke_level"],
+    )  # Lista que sera ingresada como datos
+    query = "INSERT INTO mediciones (record_id, node_id, timestamp, alert_level, temperature, humidity, wind_speed, smoke_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"  # Formato del insert
+
+    with sqlite3.connect("DBincendios.db") as con:
+        cur = con.cursor()  # Cursor hacia la bd
+        cur.execute(query, datos)
     return alert
+
 
 def procesar(nombre_sensor, campo_bd):
     valor, error = extraer_float(request)
@@ -126,18 +136,23 @@ def procesar(nombre_sensor, campo_bd):
     # Actualizamos el valor recibido en memoria
     mediciones_actuales[campo_bd] = valor
     # Evaluamos la alerta
-    #nivel = estado()
-    #alerta = ALERTS[nivel]
+    # nivel = estado()
+    # alerta = ALERTS[nivel]
     # Guardamos en la base de datos
     try:
         alert = insercion()
-        print(f"[{formato(reloj())}] {nombre_sensor}: {valor} -> Guardado en BD con alerta '{alert}'")
-        return jsonify({"status": "ok", "sensor": nombre_sensor, "valor": valor, "alerta": alert}), 200
+        print(
+            f"[{formato(reloj())}] {nombre_sensor}: {valor} -> Guardado en BD con alerta '{alert}'"
+        )
+        return jsonify(
+            {"status": "ok", "sensor": nombre_sensor, "valor": valor, "alerta": alert}
+        ), 200
     except Exception as e:
         print(f"[{formato(reloj())}] Error al escribir en BD: {e}")
         return jsonify({"error": "Error interno al guardar en BD"}), 500
-           
-#Endpoints
+
+
+# Endpoints
 @app.route("/temperature", methods=["POST"])
 def temperature():
     return procesar("Temperatura", "temperature")
@@ -147,13 +162,16 @@ def temperature():
 def humidity():
     return procesar("Humedad", "humidity")
 
-@app.route("/wind_level", methods=["POST"])
+
+@app.route("/wind_speed", methods=["POST"])
 def wind_level():
     return procesar("Nivel de viento", "wind_speed")
+
 
 @app.route("/smoke", methods=["POST"])
 def smoke():
     return procesar("Humo", "smoke_level")
+
 
 if __name__ == "__main__":
     print("Servidor iniciado:", formato(reloj()))
