@@ -3,100 +3,453 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoreo de Incendios Forestales - Grupo 1 | Navathon III</title>
-    <!-- Fuente Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Librería Chart.js para los gráficos -->
+    <title>Estación Copahue • Monitoreo de Incendios Forestales | Navathon III</title>
+    
+    <!-- Tipografías: Plus Jakarta Sans y JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js 4.4 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Enlace al archivo CSS externo -->
+    
+    <!-- Estilos de la Estación -->
     <link rel="stylesheet" href="navathon.css">
 </head>
 <body>
 
-    <header>
-        <div class="logo-area">
-            <span class="logo-icon">🔥</span>
-            <div class="logo-text">
-                <h1>Monitoreo de Incendios Forestales (neuquen)</h1>
-                <p>Caso Copahue • Grupo 1 (Navathon III)</p>
+    <!-- CABECERA DE LA ESTACIÓN -->
+    <header class="station-header">
+        <div class="station-brand">
+            <div class="brand-badge">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L3 19h18L12 2z"></path>
+                    <path d="M12 9v4"></path>
+                    <path d="M12 17h.01"></path>
+                </svg>
+            </div>
+            <div class="brand-info">
+                <div class="brand-title-row">
+                    <h1>ESTACIÓN COPAHUE</h1>
+                    <span class="station-tag">NODO 01</span>
+                </div>
+                <p class="brand-subtitle">Reserva Provincial Copahue • 1.600 m s. n. m. • Grupo 1 (Navathon III)</p>
             </div>
         </div>
-        
-        <!-- Navegación entre páginas independientes -->
-        <nav class="nav-tabs">
-            <button class="tab-btn active" onclick="location.href='index.html'">Inicio</button>
-            <button class="tab-btn" onclick="location.href='Historial/historial.html'">Historial</button>
+
+        <!-- Pestañas de navegación SPA -->
+        <nav class="station-nav" aria-label="Navegación principal">
+            <button class="nav-tab-btn active" data-tab="tab-monitor">
+                <span class="nav-icon">📊</span>
+                <span>Telemetría en Vivo</span>
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-ecosistema">
+                <span class="nav-icon">🌲</span>
+                <span>Ecosistema & Riesgo</span>
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-registros">
+                <span class="nav-icon">📋</span>
+                <span>Historial & Logs</span>
+            </button>
         </nav>
 
-        <div class="node-status">
-            <div class="status-dot"></div>
-            <span>Nodo: fire_node_01 (Activo)</span>
+        <!-- Indicador de conexión y estado del nodo -->
+        <div class="station-status-panel">
+            <div class="status-indicator">
+                <div class="status-pulse-dot" id="connectionPulse"></div>
+                <div class="status-meta">
+                    <span class="status-node-id" id="nodeLabel">fire_node_01</span>
+                    <span class="status-mode" id="connectionModeLabel">Conectando...</span>
+                </div>
+            </div>
+            <div class="live-clock">
+                <span class="clock-label">ÚLTIMA LECTURA</span>
+                <span class="clock-value" id="lastTelemetryTime">--:--:-- UTC</span>
+            </div>
         </div>
     </header>
 
-    <main>
-        <!-- SECCIÓN 1: INICIO -->
-        <section id="seccion-inicio" class="view-section active">
-            <!-- Panel de Alerta Dinámica -->
-            <div class="card alert-card" id="alertCard">
-                <div class="alert-info">
-                    <h2 id="alertTitle">Estado del Sistema: Normal (Tranqui)</h2>
-                    <p id="alertDesc">Condiciones estables en el entorno monitoreado.</p>
-                </div>
-                <div class="alert-badge" id="alertBadge">NORMAL</div>
-            </div>
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="station-main">
 
-            <!-- Métrica y Mini-gráfico: Temperatura -->
-            <div class="card">
-                <div class="card-title">
-                    <span>Temperatura Ambiental</span>
-                    <span>🌡️</span>
-                </div>
-                <div class="card-value" id="tempValue">30.7 °C</div>
-                <div class="mini-chart-wrapper">
-                    <canvas id="miniTempChart"></canvas>
-                </div>
-                <div class="card-footer">Sensor DHT22 (ESP32)</div>
-            </div>
+        <!-- ============================================================== -->
+        <!-- PESTAÑA 1: MONITOREO EN VIVO (BENTO GRID)                       -->
+        <!-- ============================================================== -->
+        <section id="tab-monitor" class="station-view active">
+            <div class="bento-grid">
 
-            <!-- Métrica y Mini-gráfico: Humedad -->
-            <div class="card">
-                <div class="card-title">
-                    <span>Humedad Relativa</span>
-                    <span>💧</span>
-                </div>
-                <div class="card-value" id="humValue">26 %</div>
-                <div class="mini-chart-wrapper">
-                    <canvas id="miniHumChart"></canvas>
-                </div>
-                <div class="card-footer">Umbral crítico bajo: &lt; 30%</div>
-            </div>
+                <!-- 1. HERO CARD: ÍNDICE DE RIESGO CORDILLERANO -->
+                <article class="bento-card hero-risk-card" id="riskCard">
+                    <div class="card-header-clean">
+                        <div class="pill-title">
+                            <span class="dot-indicator"></span>
+                            <span>EVALUACIÓN DE AMENAZA FORESTAL</span>
+                        </div>
+                        <span class="rule-chip" id="cordilleranRuleChip">Regla 25-25-30: Segura</span>
+                    </div>
 
-            <!-- Métrica y Mini-gráfico: Viento -->
-            <div class="card">
-                <div class="card-title">
-                    <span>Velocidad del Viento</span>
-                    <span>💨</span>
-                </div>
-                <div class="card-value" id="windValue">24 km/h</div>
-                <div class="mini-chart-wrapper">
-                    <canvas id="miniWindChart"></canvas>
-                </div>
-                <div class="card-footer">Factor de propagación</div>
-            </div>
+                    <div class="risk-gauge-container">
+                        <div class="risk-level-display">
+                            <span class="risk-number" id="riskLevelNumber">1</span>
+                            <div class="risk-text-block">
+                                <span class="risk-category-badge" id="riskLevelBadge">BAJO / SEGURO</span>
+                                <span class="risk-classification-text">Índice Bioclimático Nelson-Simard</span>
+                            </div>
+                        </div>
 
-            <!-- Gráfico Combinado en Vivo -->
-            <div class="combined-section">
-                <h3>Gráfico Combinado en Vivo (Temperatura, Humedad y Viento)</h3>
-                <p>Monitoreo unificado en tiempo real para determinar si el estado es seguro o grave.</p>
-                <div class="canvas-wrapper-large">
-                    <canvas id="liveCombinedChart"></canvas>
+                        <!-- Barra de severidad segmentada -->
+                        <div class="severity-scale" aria-hidden="true">
+                            <div class="severity-segment seg-1 active" title="Nivel 1: Bajo"></div>
+                            <div class="severity-segment seg-2" title="Nivel 2: Moderado"></div>
+                            <div class="severity-segment seg-3" title="Nivel 3: Alto"></div>
+                            <div class="severity-segment seg-4" title="Nivel 4: Muy Alto"></div>
+                            <div class="severity-segment seg-5" title="Nivel 5: Extremo"></div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnóstico ambiental dinámico -->
+                    <div class="risk-diagnostic-box">
+                        <div class="diag-header">
+                            <span class="diag-label">Diagnóstico del Ecosistema:</span>
+                            <span class="diag-species">Pehuén • Lenga • Ñire</span>
+                        </div>
+                        <p class="diag-desc" id="riskDiagnosticText">
+                            Condiciones meteorológicas estables en Caviahue. Humedad foliar adecuada para contención de chispas en sotobosque.
+                        </p>
+                    </div>
+
+                    <!-- Indicador HCFM (Humedad Combustible Fino Muerto) -->
+                    <div class="hcfm-metric-row">
+                        <div class="hcfm-label-group">
+                            <span class="hcfm-title">HCFM Estimada (Hojarasca &lt; 6mm)</span>
+                            <span class="hcfm-sub">Umbral crítico de ignición rápida: &le; 10%</span>
+                        </div>
+                        <div class="hcfm-value-badge" id="hcfmValueBadge">
+                            <span class="mono-num" id="hcfmValue">22.4</span>
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 2. GRID 2X2 DE SENSORES EN CAMPO -->
+                <div class="sensor-quad-grid">
+                    
+                    <!-- Tarjeta: Temperatura -->
+                    <article class="bento-card sensor-card sensor-temp">
+                        <div class="sensor-header">
+                            <span class="sensor-name">Temperatura Ambiental</span>
+                            <span class="sensor-icon-pill">🌡️</span>
+                        </div>
+                        <div class="sensor-metric-body">
+                            <div class="sensor-primary-value">
+                                <span class="mono-value" id="tempDisplay">--.-</span>
+                                <span class="sensor-unit">°C</span>
+                            </div>
+                            <div class="sensor-context" id="tempContext">
+                                <span class="context-delta" id="tempDelta">+0.0 °C</span>
+                                <span class="context-ref">vs media estival (13°C)</span>
+                            </div>
+                        </div>
+                        <div class="sensor-footer">
+                            <span class="sensor-sensor-id">Sensor DHT22 • ESP32</span>
+                            <div class="trend-spark-wrap">
+                                <canvas id="sparkTemp"></canvas>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Tarjeta: Humedad Relativa -->
+                    <article class="bento-card sensor-card sensor-hum">
+                        <div class="sensor-header">
+                            <span class="sensor-name">Humedad Relativa</span>
+                            <span class="sensor-icon-pill">💧</span>
+                        </div>
+                        <div class="sensor-metric-body">
+                            <div class="sensor-primary-value">
+                                <span class="mono-value" id="humDisplay">--</span>
+                                <span class="sensor-unit">%</span>
+                            </div>
+                            <div class="sensor-context">
+                                <span class="context-badge" id="humStatusBadge">Rango Seguro</span>
+                                <span class="context-ref">Estrés hídrico: &lt; 25%</span>
+                            </div>
+                        </div>
+                        <div class="sensor-footer">
+                            <span class="sensor-sensor-id">Higrómetro Capacitivo</span>
+                            <div class="trend-spark-wrap">
+                                <canvas id="sparkHum"></canvas>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Tarjeta: Viento -->
+                    <article class="bento-card sensor-card sensor-wind">
+                        <div class="sensor-header">
+                            <span class="sensor-name">Velocidad del Viento</span>
+                            <span class="sensor-icon-pill">💨</span>
+                        </div>
+                        <div class="sensor-metric-body">
+                            <div class="sensor-primary-value">
+                                <span class="mono-value" id="windDisplay">--.-</span>
+                                <span class="sensor-unit">km/h</span>
+                            </div>
+                            <div class="sensor-context">
+                                <span class="context-badge" id="windStatusBadge">Brisa Moderada</span>
+                                <span class="context-ref">Dispersión de pavesas</span>
+                            </div>
+                        </div>
+                        <div class="sensor-footer">
+                            <span class="sensor-sensor-id">Anemómetro Cordillerano</span>
+                            <div class="trend-spark-wrap">
+                                <canvas id="sparkWind"></canvas>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Tarjeta: Humo y Gases (MQ) -->
+                    <article class="bento-card sensor-card sensor-smoke">
+                        <div class="sensor-header">
+                            <span class="sensor-name">Nivel de Humo y Gases</span>
+                            <span class="sensor-icon-pill">🌫️</span>
+                        </div>
+                        <div class="sensor-metric-body">
+                            <div class="sensor-primary-value">
+                                <span class="mono-value" id="smokeDisplay">0.0</span>
+                                <span class="sensor-unit">ppm</span>
+                            </div>
+                            <div class="sensor-context">
+                                <span class="context-badge" id="smokeStatusBadge">Atmósfera Limpia</span>
+                                <span class="context-ref">Umbral de humo: &gt; 8 ppm</span>
+                            </div>
+                        </div>
+                        <div class="sensor-footer">
+                            <span class="sensor-sensor-id">Sensor MQ Gas/Combustión</span>
+                            <div class="trend-spark-wrap">
+                                <canvas id="sparkSmoke"></canvas>
+                            </div>
+                        </div>
+                    </article>
                 </div>
+
+                <!-- 3. GRÁFICO HISTÓRICO Y EVOLUTIVO COMBINADO -->
+                <article class="bento-card chart-master-card">
+                    <div class="chart-top-toolbar">
+                        <div class="chart-heading">
+                            <h3>Comportamiento Temporal de Variables</h3>
+                            <p>Evolución de mediciones recientes para análisis de desecación bioclimática</p>
+                        </div>
+
+                        <div class="chart-controls">
+                            <div class="filter-pills" role="group" aria-label="Filtro de métricas">
+                                <button class="filter-btn active" data-metric="all">Todas</button>
+                                <button class="filter-btn" data-metric="temp">Temperatura</button>
+                                <button class="filter-btn" data-metric="hum">Humedad</button>
+                                <button class="filter-btn" data-metric="wind">Viento</button>
+                                <button class="filter-btn" data-metric="smoke">Humo</button>
+                            </div>
+
+                            <button class="action-btn-clean" id="btnToggleSim" title="Alternar entre API real y simulador en vivo">
+                                <span class="action-btn-dot"></span>
+                                <span id="btnSimLabel">Modo Demo</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="main-chart-wrapper">
+                        <canvas id="liveCombinedChart"></canvas>
+                    </div>
+
+                    <div class="chart-footer-meta">
+                        <span>Fuente: SQLite <code>DBincendios.db</code> • Esquema Navathon 1.0.0</span>
+                        <span>Frecuencia de muestreo: Cada 5 segundos</span>
+                    </div>
+                </article>
+
             </div>
         </section>
+
+        <!-- ============================================================== -->
+        <!-- PESTAÑA 2: ECOSISTEMA Y REGLA CORDILLERANA                      -->
+        <!-- ============================================================== -->
+        <section id="tab-ecosistema" class="station-view">
+            <div class="ecosystem-view-grid">
+                
+                <article class="bento-card eco-intro-card">
+                    <div class="pill-title">
+                        <span class="dot-indicator"></span>
+                        <span>BIOGEOGRAFÍA Y VULNERABILIDAD</span>
+                    </div>
+                    <h2>Reserva Provincial Copahue (Neuquén)</h2>
+                    <p class="eco-lead">
+                        Ubicada a 1.600 m s. n. m. al pie del volcán Copahue, la zona conforma un ecotono de alta fragilidad ecológica donde conviven coníferas milenarias con estratos arbustivos de rápido estrés hídrico.
+                    </p>
+
+                    <div class="flora-fauna-cards">
+                        <div class="specie-card">
+                            <div class="specie-icon">🌲</div>
+                            <div class="specie-details">
+                                <h4>Pehuén (Araucaria araucana)</h4>
+                                <p>Conífera fósil viviente. Sus acículas y resinas provocan fuegos de copas letales de regeneración natural prácticamente nula.</p>
+                            </div>
+                        </div>
+
+                        <div class="specie-card">
+                            <div class="specie-icon">🍂</div>
+                            <div class="specie-details">
+                                <h4>Lenga (Nothofagus pumilio)</h4>
+                                <p>Especie caducifolia. Su hojarasca estival constituye combustible fino muerto (clase 1 hora) de ignición instantánea.</p>
+                            </div>
+                        </div>
+
+                        <div class="specie-card">
+                            <div class="specie-icon">🌿</div>
+                            <div class="specie-details">
+                                <h4>Ñire (Nothofagus antarctica)</h4>
+                                <p>Actúa como combustible escalera continuo, conectando el suelo seco con el dosel alto de los pehuenes.</p>
+                            </div>
+                        </div>
+
+                        <div class="specie-card">
+                            <div class="specie-icon">🦎</div>
+                            <div class="specie-details">
+                                <h4>Lagartija del Copahue (Liolaemus copahuensis)</h4>
+                                <p>Endemismo estricto de las coladas de lava de baja movilidad. Mortalidad directa cercana al 100% ante incendios.</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="bento-card eco-rule-card">
+                    <div class="pill-title">
+                        <span class="dot-indicator"></span>
+                        <span>FUNDAMENTO CIENTÍFICO</span>
+                    </div>
+                    <h3>Regla Cordillerana 25-25-30</h3>
+                    <p>
+                        A 1.600 m s. n. m. la regla internacional tradicional (30-30-30) resulta insuficiente. Con una media estival de 13 °C, alcanzar 25 °C genera el mismo impacto hídrico que 35 °C en el llano.
+                    </p>
+
+                    <div class="formula-box">
+                        <code>T &ge; 25 °C &nbsp;+&nbsp; HR &le; 25% &nbsp;+&nbsp; Viento &ge; 30 km/h</code>
+                    </div>
+
+                    <h4 class="rule-subtitle">Matriz de Severidad Bioclimática</h4>
+                    <div class="rule-table-wrap">
+                        <table class="eco-table">
+                            <thead>
+                                <tr>
+                                    <th>Nivel</th>
+                                    <th>Clasificación</th>
+                                    <th>Temp.</th>
+                                    <th>Humedad</th>
+                                    <th>Viento</th>
+                                    <th>HCFM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="row-level-1">
+                                    <td><span class="badge-num bg-b1">1</span></td>
+                                    <td><strong>Bajo</strong></td>
+                                    <td>&lt; 20 °C</td>
+                                    <td>&gt; 25%</td>
+                                    <td>&lt; 15 km/h</td>
+                                    <td>&gt; 20%</td>
+                                </tr>
+                                <tr class="row-level-2">
+                                    <td><span class="badge-num bg-b2">2</span></td>
+                                    <td><strong>Moderado</strong></td>
+                                    <td>&ge; 20 °C</td>
+                                    <td>&le; 25%</td>
+                                    <td>15 - 25 km/h</td>
+                                    <td>15 - 20%</td>
+                                </tr>
+                                <tr class="row-level-3">
+                                    <td><span class="badge-num bg-b3">3</span></td>
+                                    <td><strong>Alto</strong></td>
+                                    <td>&ge; 23 °C</td>
+                                    <td>&le; 25%</td>
+                                    <td>25 - 35 km/h</td>
+                                    <td>10 - 14%</td>
+                                </tr>
+                                <tr class="row-level-4">
+                                    <td><span class="badge-num bg-b4">4</span></td>
+                                    <td><strong>Muy Alto</strong></td>
+                                    <td>&ge; 31 °C</td>
+                                    <td>&le; 20%</td>
+                                    <td>&gt; 35 km/h</td>
+                                    <td>6 - 9%</td>
+                                </tr>
+                                <tr class="row-level-5">
+                                    <td><span class="badge-num bg-b5">5</span></td>
+                                    <td><strong>Extremo</strong></td>
+                                    <td>&ge; 35 °C</td>
+                                    <td>&le; 15%</td>
+                                    <td>&gt; 45 km/h</td>
+                                    <td>&lt; 6%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- PESTAÑA 3: HISTORIAL & LOGS DE TELEMETRÍA                       -->
+        <!-- ============================================================== -->
+        <section id="tab-registros" class="station-view">
+            <article class="bento-card table-master-card">
+                <div class="table-toolbar">
+                    <div>
+                        <h3>Registro Histórico de Mediciones</h3>
+                        <p>Auditoría de eventos recibidos por el nodo de borde y procesados en SQLite</p>
+                    </div>
+                    <div class="table-actions">
+                        <span class="log-count-pill" id="logCounter">0 registros</span>
+                        <button class="action-btn-clean" id="btnClearLogs">Limpiar Vista</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive-wrapper">
+                    <table class="station-data-table" id="telemetryTable">
+                        <thead>
+                            <tr>
+                                <th>Marca Temporal (UTC)</th>
+                                <th>Nodo</th>
+                                <th>Nivel Alerta</th>
+                                <th>Temp (°C)</th>
+                                <th>Humedad (%)</th>
+                                <th>Viento (km/h)</th>
+                                <th>Humo (ppm)</th>
+                                <th>HCFM (%)</th>
+                                <th>ID Registro (UUID)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="telemetryTableBody">
+                            <!-- Filas inyectadas dinámicamente por JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+
     </main>
 
-    <!-- Enlace al archivo JavaScript externo -->
+    <!-- PIE INSTITUCIONAL -->
+    <footer class="station-footer">
+        <div class="footer-inner">
+            <div class="footer-left">
+                <span class="footer-flag">🇦🇷</span>
+                <span>Navathon III (2026) • <strong>Grupo 1: Monitoreo de Incendios Forestales</strong></span>
+            </div>
+            <div class="footer-right">
+                <span>Integraciones activas: Grupo 6 (Dashboard Integrador) & Grupo 5 (Alertas)</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lógica de la Estación -->
     <script src="navathon.js"></script>
 </body>
 </html>

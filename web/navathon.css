@@ -1,210 +1,1038 @@
+/* ==========================================================================
+   ESTACIÓN COPAHUE - SISTEMA DE DISEÑO BIOCLIMÁTICO
+   Inspirado en el Pehuén, la Lenga y el Basalto Volcánico de Neuquén
+   ========================================================================== */
+
 :root {
-    --bg-color: #0f172a;
-    --card-bg: rgba(30, 41, 59, 0.7);
-    --border-color: rgba(255, 255, 255, 0.1);
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --accent-fire: #f97316;
-    --alert-normal: #22c55e;
-    --alert-medium: #eab308;
-    --alert-critical: #ef4444;
+    /* Superficies y Basalto Volcánico */
+    --bg-deep: #090d0b;
+    --bg-surface: #101613;
+    --bg-surface-elevated: #16201b;
+    --bg-surface-glass: rgba(16, 22, 19, 0.85);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(52, 211, 153, 0.25);
+    --border-focus: #34d399;
+
+    /* Paleta Botánica Cordillerana */
+    --pehuen-deep: #0d261b;
+    --pehuen-pine: #1b4d37;
+    --pehuen-leaf: #34d399;
+    --pehuen-glow: rgba(52, 211, 153, 0.2);
+    --lenga-gold: #d97706;
+    --lenga-amber: #f59e0b;
+    --lenga-soft: rgba(245, 158, 11, 0.15);
+    --nire-olive: #65a30d;
+    --glacier-cyan: #06b6d4;
+    --glacier-soft: rgba(6, 182, 212, 0.15);
+
+    /* Escala Cromática de Severidad de Alerta */
+    --alert-b1: #10b981;   /* Nivel 1: Bajo / Seguro */
+    --alert-b2: #f59e0b;   /* Nivel 2: Moderado */
+    --alert-b3: #ea580c;   /* Nivel 3: Alto */
+    --alert-b4: #ef4444;   /* Nivel 4: Muy Alto / Crítico */
+    --alert-b5: #a855f7;   /* Nivel 5: Extremo */
+
+    /* Tipografía */
+    --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Textos */
+    --text-primary: #f0fdf4;
+    --text-secondary: #9cb3a5;
+    --text-muted: #5e7769;
+    --text-contrast: #ffffff;
+
+    /* Dimensiones y Efectos */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-full: 9999px;
+    --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ==========================================================================
+   RESET Y REGLAS BASE
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
 }
 
 body {
-    background-color: var(--bg-color);
-    background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), 
-                      radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
+    background-color: var(--bg-deep);
+    background-image: 
+        radial-gradient(ellipse at 80% 0%, rgba(27, 77, 55, 0.18) 0%, transparent 60%),
+        radial-gradient(circle at 10% 30%, rgba(217, 119, 6, 0.08) 0%, transparent 40%),
+        linear-gradient(to bottom, #090d0b 0%, #0d1210 100%);
+    background-attachment: fixed;
     color: var(--text-primary);
+    font-family: var(--font-display);
+    font-size: 15px;
+    line-height: 1.5;
     min-height: 100vh;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
 }
 
-header {
+/* ==========================================================================
+   CABECERA DE LA ESTACIÓN
+   ========================================================================== */
+.station-header {
+    background: var(--bg-surface-glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 14px 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
-    margin: 0 auto 30px auto;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 20px;
     flex-wrap: wrap;
-    gap: 15px;
 }
 
-.logo-area {
+.station-brand {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 14px;
 }
 
-.logo-icon {
-    font-size: 2rem;
+.brand-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--pehuen-pine), var(--pehuen-deep));
+    border: 1px solid var(--border-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pehuen-leaf);
+    box-shadow: 0 0 15px var(--pehuen-glow);
 }
 
-.logo-text h1 {
+.brand-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.brand-info h1 {
     font-size: 1.15rem;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1.2;
 }
 
-.logo-text p {
+.brand-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.station-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--pehuen-leaf);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    letter-spacing: 0.05em;
+}
+
+.brand-subtitle {
     font-size: 0.8rem;
     color: var(--text-secondary);
 }
 
-.nav-tabs {
+/* PESTAÑAS DE NAVEGACIÓN */
+.station-nav {
     display: flex;
-    gap: 10px;
-    background: rgba(15, 23, 42, 0.5);
-    padding: 5px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.35);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    gap: 4px;
 }
 
-.tab-btn {
+.nav-tab-btn {
     background: transparent;
     border: none;
     color: var(--text-secondary);
     padding: 8px 16px;
+    font-family: var(--font-display);
+    font-size: 0.86rem;
     font-weight: 600;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    border-radius: 8px;
-}
-
-.tab-btn.active, .tab-btn:hover {
-    background: var(--card-bg);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.node-status {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: var(--card-bg);
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
-    font-size: 0.9rem;
+    transition: var(--transition-fast);
 }
 
-.status-dot {
-    width: 10px;
-    height: 10px;
-    background-color: var(--alert-normal);
+.nav-tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-tab-btn.active {
+    background: var(--bg-surface-elevated);
+    color: var(--pehuen-leaf);
+    border: 1px solid var(--border-hover);
+    box-shadow: var(--shadow-soft);
+}
+
+.nav-icon {
+    font-size: 0.95rem;
+}
+
+/* PANEL DE ESTADO Y RELOJ */
+.station-status-panel {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-surface-elevated);
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-subtle);
+}
+
+.status-pulse-dot {
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
-    box-shadow: 0 0 8px var(--alert-normal);
+    background-color: var(--alert-b1);
+    box-shadow: 0 0 10px var(--alert-b1);
+    transition: var(--transition-fast);
 }
 
-main {
-    max-width: 1200px;
+.status-pulse-dot.pulsing {
+    animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1.15); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.status-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.status-node-id {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.status-mode {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+}
+
+.live-clock {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.clock-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.clock-value {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   LAYOUT PRINCIPAL Y VISTAS
+   ========================================================================== */
+.station-main {
+    max-width: 1400px;
+    width: 100%;
     margin: 0 auto;
+    padding: 24px 28px;
+    flex: 1;
 }
 
-.view-section {
+.station-view {
+    display: none;
+    animation: fadeInView 0.3s ease-out;
+}
+
+.station-view.active {
+    display: block;
+}
+
+@keyframes fadeInView {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   BENTO GRID LAYOUT
+   ========================================================================== */
+.bento-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 22px;
 }
 
-.card {
-    background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 20px;
+.bento-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.bento-card:hover {
+    border-color: var(--border-hover);
+}
+
+/* 1. HERO RISK CARD (5 COLUMNAS EN DESKTOP) */
+.hero-risk-card {
+    grid-column: span 5;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    background: linear-gradient(160deg, #121c17 0%, #0d1511 100%);
+    border-left: 5px solid var(--alert-b1);
+    gap: 16px;
 }
 
-.card-title {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 10px;
+.card-header-clean {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.card-value {
-    font-size: 2rem;
+.pill-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.73rem;
     font-weight: 700;
-    margin-bottom: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
 }
 
-.card-footer {
-    font-size: 0.75rem;
+.dot-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--pehuen-leaf);
+}
+
+.rule-chip {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
     color: var(--text-secondary);
-    margin-top: 10px;
 }
 
-.mini-chart-wrapper {
-    position: relative;
-    height: 90px;
-    width: 100%;
-}
-
-.alert-card {
-    grid-column: 1 / -1;
+/* Indicador y Medidor de Severidad */
+.risk-gauge-container {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
-    border-left: 6px solid var(--alert-normal);
-    padding: 25px;
-    gap: 20px;
+    flex-direction: column;
+    gap: 12px;
+    margin: 6px 0;
 }
 
-.alert-info h2 {
-    font-size: 1.2rem;
+.risk-level-display {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+}
+
+.risk-number {
+    font-family: var(--font-mono);
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--alert-b1);
+    letter-spacing: -0.05em;
+    transition: var(--transition-fast);
+}
+
+.risk-text-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.risk-category-badge {
+    display: inline-block;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--alert-b1);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.risk-classification-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Barra de severidad segmentada */
+.severity-scale {
+    display: flex;
+    gap: 6px;
+    height: 8px;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2px;
+    border-radius: var(--radius-full);
+}
+
+.severity-segment {
+    flex: 1;
+    border-radius: var(--radius-full);
+    opacity: 0.2;
+    transition: var(--transition-fast);
+}
+
+.severity-segment.seg-1 { background-color: var(--alert-b1); }
+.severity-segment.seg-2 { background-color: var(--alert-b2); }
+.severity-segment.seg-3 { background-color: var(--alert-b3); }
+.severity-segment.seg-4 { background-color: var(--alert-b4); }
+.severity-segment.seg-5 { background-color: var(--alert-b5); }
+
+.severity-segment.active {
+    opacity: 1;
+    box-shadow: 0 0 8px currentColor;
+}
+
+/* Diagnóstico ecológico */
+.risk-diagnostic-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+}
+
+.diag-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
     margin-bottom: 5px;
 }
 
-.alert-info p {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+.diag-species {
+    color: var(--pehuen-leaf);
+    font-weight: 600;
 }
 
-.alert-badge {
-    padding: 8px 20px;
-    border-radius: 8px;
+.diag-desc {
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+/* Fila HCFM */
+.hcfm-metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(52, 211, 153, 0.05);
+    border: 1px solid rgba(52, 211, 153, 0.15);
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+}
+
+.hcfm-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+}
+
+.hcfm-sub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.hcfm-value-badge {
+    background: rgba(16, 22, 19, 0.9);
+    border: 1px solid var(--border-subtle);
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+}
+
+.mono-num {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
     font-weight: 700;
-    font-size: 0.95rem;
-    background: rgba(34, 197, 94, 0.2);
-    color: var(--alert-normal);
-    border: 1px solid var(--alert-normal);
+    color: var(--pehuen-leaf);
+}
+
+.unit {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* 2. SENSOR QUAD GRID (7 COLUMNAS EN DESKTOP) */
+.sensor-quad-grid {
+    grid-column: span 7;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.sensor-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 18px;
+    min-height: 175px;
+}
+
+.sensor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sensor-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.sensor-icon-pill {
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+}
+
+.sensor-metric-body {
+    margin: 8px 0;
+}
+
+.sensor-primary-value {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.mono-value {
+    font-family: var(--font-mono);
+    font-size: 2.3rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.sensor-unit {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.sensor-context {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-size: 0.74rem;
+}
+
+.context-delta {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--lenga-soft);
+    color: var(--lenga-amber);
+}
+
+.context-ref {
+    color: var(--text-muted);
+}
+
+.context-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+}
+
+.sensor-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 8px;
+    margin-top: 4px;
+}
+
+.sensor-sensor-id {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.trend-spark-wrap {
+    width: 65px;
+    height: 24px;
+}
+
+/* 3. CHART MASTER CARD (12 COLUMNAS EN DESKTOP) */
+.chart-master-card {
+    grid-column: span 12;
+    padding: 24px;
+}
+
+.chart-top-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.chart-heading h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.chart-heading p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.filter-pills {
+    display: flex;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 3px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    gap: 3px;
+}
+
+.filter-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.filter-btn:hover {
+    color: var(--text-primary);
+}
+
+.filter-btn.active {
+    background: var(--bg-surface-elevated);
+    color: var(--pehuen-leaf);
+    border: 1px solid var(--border-hover);
+}
+
+.action-btn-clean {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: var(--transition-fast);
+}
+
+.action-btn-clean:hover {
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+}
+
+.action-btn-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--lenga-amber);
+}
+
+.main-chart-wrapper {
+    position: relative;
+    height: 340px;
+    width: 100%;
+}
+
+.chart-footer-meta {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 14px;
+    margin-top: 18px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   VISTA 2: ECOSISTEMA Y REGLA CORDILLERANA
+   ========================================================================== */
+.ecosystem-view-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 22px;
+}
+
+.eco-intro-card {
+    grid-column: span 7;
+}
+
+.eco-intro-card h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 10px 0;
+    color: var(--text-primary);
+}
+
+.eco-lead {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+
+.flora-fauna-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.specie-card {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+}
+
+.specie-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.specie-details h4 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.specie-details p {
+    font-size: 0.77rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.eco-rule-card {
+    grid-column: span 5;
+}
+
+.eco-rule-card h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 10px 0 6px 0;
+}
+
+.eco-rule-card p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.formula-box {
+    background: rgba(217, 119, 6, 0.1);
+    border: 1px solid rgba(217, 119, 6, 0.3);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.formula-box code {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--lenga-amber);
+}
+
+.rule-subtitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.rule-table-wrap {
+    overflow-x: auto;
+}
+
+.eco-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.eco-table th {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.eco-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.badge-num {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.bg-b1 { background: var(--alert-b1); }
+.bg-b2 { background: var(--alert-b2); }
+.bg-b3 { background: var(--alert-b3); }
+.bg-b4 { background: var(--alert-b4); }
+.bg-b5 { background: var(--alert-b5); }
+
+/* ==========================================================================
+   VISTA 3: TABLA DE HISTORIAL Y REGISTROS
+   ========================================================================== */
+.table-master-card {
+    padding: 24px;
+}
+
+.table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.table-toolbar h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.table-toolbar p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.log-count-pill {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+}
+
+.table-responsive-wrapper {
+    overflow-x: auto;
+    max-height: 520px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+.station-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    text-align: left;
+}
+
+.station-data-table thead {
+    position: sticky;
+    top: 0;
+    background: #141c18;
+    z-index: 5;
+}
+
+.station-data-table th {
+    padding: 12px 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-subtle);
     white-space: nowrap;
 }
 
-.combined-section {
-    grid-column: 1 / -1;
-    background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 25px;
-}
-
-.combined-section h3 {
-    margin-bottom: 5px;
-}
-
-.combined-section p {
+.station-data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     color: var(--text-secondary);
-    font-size: 0.85rem;
-    margin-bottom: 15px;
+    font-family: var(--font-mono);
+    white-space: nowrap;
 }
 
-.canvas-wrapper-large {
-    position: relative;
-    height: 320px;
-    width: 100%;
+.station-data-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-primary);
+}
+
+.table-alert-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.table-alert-pill.normal { background: rgba(16, 185, 129, 0.15); color: var(--alert-b1); }
+.table-alert-pill.low { background: rgba(245, 158, 11, 0.15); color: var(--alert-b2); }
+.table-alert-pill.medium { background: rgba(234, 88, 12, 0.15); color: var(--alert-b3); }
+.table-alert-pill.high { background: rgba(239, 68, 68, 0.15); color: var(--alert-b4); }
+.table-alert-pill.critical { background: rgba(168, 85, 247, 0.15); color: var(--alert-b5); }
+
+/* ==========================================================================
+   PIE DE PÁGINA
+   ========================================================================== */
+.station-footer {
+    border-top: 1px solid var(--border-subtle);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 16px 28px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+.footer-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.footer-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ==========================================================================
+   RESPONSIVIDAD Y BREAKPOINTS
+   ========================================================================== */
+@media (max-width: 1100px) {
+    .hero-risk-card {
+        grid-column: span 12;
+    }
+    .sensor-quad-grid {
+        grid-column: span 12;
+    }
+    .eco-intro-card {
+        grid-column: span 12;
+    }
+    .eco-rule-card {
+        grid-column: span 12;
+    }
+}
+
+@media (max-width: 768px) {
+    .station-header {
+        padding: 12px 16px;
+    }
+    .station-main {
+        padding: 16px;
+    }
+    .station-nav {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+    }
+    .sensor-quad-grid {
+        grid-template-columns: 1fr;
+    }
+    .flora-fauna-cards {
+        grid-template-columns: 1fr;
+    }
+    .chart-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+    .filter-pills {
+        width: 100%;
+        overflow-x: auto;
+    }
 }
